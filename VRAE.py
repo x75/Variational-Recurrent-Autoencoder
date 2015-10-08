@@ -134,6 +134,11 @@ class VRAE:
 
         batch = T.iscalar('batch')
 
+        print(data.shape, self.batch_size, batch*self.batch_size, (batch+1)*self.batch_size)
+        # print(data[:,:,batch])
+        print(data[:,:,0])
+        print(data[:,batch*self.batch_size:(batch+1)*self.batch_size,:])
+        
         givens = {
             h0_enc: np.zeros((self.hidden_units_encoder,self.batch_size)).astype(theano.config.floatX), 
             x0:     np.zeros((self.features,self.batch_size)).astype(theano.config.floatX),
