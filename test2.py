@@ -64,9 +64,9 @@ print "Creating Theano functions"
 encoder.create_gradientfunctions(data)
 
 print "Initializing weights and biases"
-encoder.initParams()
-lowerbound = np.array([])
-testlowerbound = np.array([])
+# encoder.initParams()
+# lowerbound = np.array([])
+# testlowerbound = np.array([])
 
 begin = time.time()
 for j in xrange(1500):
