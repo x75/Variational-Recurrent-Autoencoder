@@ -13,9 +13,12 @@ Otto Fabius - <ottofabius@gmail.com>
 # import VariationalAutoencoder
 import VRAE
 import numpy as np
+import theano
 import argparse
 import time
 import gzip, cPickle
+
+import matplotlib.pylab as pl
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-d","--double", help="Train on hidden layer of previously trained AE - specify params", default = False)
@@ -35,13 +38,13 @@ data = data.reshape((1, data.shape[0], data.shape[1]))
 
 print(data.shape)
 
-dimZ = 20
+dimZ = latent_variables = 20
 HU_decoder = 400
 HU_encoder = HU_decoder
 
 batch_size = 100
 L = 1
-learning_rate = 0.01
+learning_rate = 1e-3
 
 if args.double:
     print 'computing hidden layer to train new AE on'
@@ -61,24 +64,43 @@ if args.double:
 
 print "Creating Theano functions"
 # encoder.createGradientFunctions()
-encoder.create_gradientfunctions(data)
+# data = data.reshape((1, data.shape[0], data.shape[1]))
+tdata = theano.shared(data.astype(np.float64))
+encoder.create_gradientfunctions(tdata)
 
-print "Initializing weights and biases"
+print("encoding")
+z, mu_encoder, log_sigma_encoder = encoder.encode((data[0].T)[:1000])
+
+print("z.shape, z, mu_enc, s_enc", z.shape, mu_encoder, log_sigma_encoder)
+np.save("z.npy", z)
+
+pl.plot(z)
+pl.show()
+
+print("decoding")
+x = encoder.decode(10, latent_variables, z)
+print("x.shape, x", x.shape, x)
+
+pl.plot(x)
+pl.show()
+
+
+# print "Initializing weights and biases"
 # encoder.initParams()
 # lowerbound = np.array([])
 # testlowerbound = np.array([])
 
-begin = time.time()
-for j in xrange(1500):
-    encoder.lowerbound = 0
-    print 'Iteration:', j
-    encoder.iterate(data)
-    end = time.time()
-    print("Iteration %d, lower bound = %.2f,"
-          " time = %.2fs"
-          % (j, encoder.lowerbound/N, end - begin))
-    begin = end
+# begin = time.time()
+# for j in xrange(1500):
+#     encoder.lowerbound = 0
+#     print 'Iteration:', j
+#     encoder.iterate(data)
+#     end = time.time()
+#     print("Iteration %d, lower bound = %.2f,"
+#           " time = %.2fs"
+#           % (j, encoder.lowerbound/N, end - begin))
+#     begin = end
 
-    if j % 5 == 0:
-        print "Calculating test lowerbound"
-        testlowerbound = np.append(testlowerbound,encoder.getLowerBound(x_test))
+#     if j % 5 == 0:
+#         print "Calculating test lowerbound"
+#         testlowerbound = np.append(testlowerbound,encoder.getLowerBound(x_test))

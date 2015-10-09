@@ -48,7 +48,8 @@ print("save_parameters")
 vrae.save_parameters("data/")
 
 print("encoding")
-z, mu_encoder, log_sigma_encoder = vrae.encode(data[0,:1].T)
+# z, mu_encoder, log_sigma_encoder = vrae.encode(data[0,:1].T)
+z, mu_encoder, log_sigma_encoder = vrae.encode((data[0].T)[:1000])
 
 print("z.shape, z, mu_enc, s_enc", z.shape, mu_encoder, log_sigma_encoder)
 np.save("z.npy", z)

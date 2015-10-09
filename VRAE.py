@@ -24,7 +24,7 @@ class VRAE:
         W_xhe = theano.shared(np.random.normal(0,sigma_init,(hidden_units_encoder,features)).astype(theano.config.floatX), name='W_xhe')
         W_hhe = theano.shared(np.random.normal(0,sigma_init,(hidden_units_encoder,hidden_units_encoder)).astype(theano.config.floatX), name='W_hhe')
         
-        b_he = theano.shared(np.zeros((hidden_units_encoder,1)).astype(theano.config.floatX), name='b_xhe', broadcastable=(False,True))
+        b_he = theano.shared(np.zeros((hidden_units_encoder,1)).astype(theano.config.floatX), name='b_hhe', broadcastable=(False,True))
 
         W_hmu = theano.shared(np.random.normal(0,sigma_init,(latent_variables,hidden_units_encoder)).astype(theano.config.floatX), name='W_hmu')
         b_hmu = theano.shared(np.zeros((latent_variables,1)).astype(theano.config.floatX), name='b_hmu', broadcastable=(False,True))
@@ -134,20 +134,10 @@ class VRAE:
 
         batch = T.iscalar('batch')
 
-        # print(data.dtype)
-        # data = data.astype(np.float64)
-        # data = theano.shared(data)
-        
-        # print(data.shape, self.batch_size, batch*self.batch_size, (batch+1)*self.batch_size)
-        # # print(data[:,:,batch])
-        # print(data[:,:,0])
-        # print(data[:,:,batch*self.batch_size:(batch+1)*self.batch_size])
-        
         givens = {
             h0_enc: np.zeros((self.hidden_units_encoder,self.batch_size)).astype(theano.config.floatX), 
             x0:     np.zeros((self.features,self.batch_size)).astype(theano.config.floatX),
             x:      data[:,:,batch*self.batch_size:(batch+1)*self.batch_size]
-            # x:      data[:,batch*self.batch_size:(batch+1)*self.batch_size]
         }
 
         self.updatefunction = theano.function([batch,epoch], logpx, updates=updates, givens=givens, allow_input_downcast=True)
@@ -167,18 +157,12 @@ class VRAE:
         W_hsigma = self.params["W_hsigma"].get_value()
         b_hsigma = self.params["b_hsigma"].get_value()
 
-        print("x.shape", x.shape, "h.shape", h.shape)
         for t in xrange(x.shape[0]):
-            # h = T.tanh(self.params["W_hhd"].dot(h_t) + self.params["W_xhd"].dot(x_t) + self.params["b_hd"])
-            # T.tanh(self.params["W_xhe"].dot(x_t) + self.params["W_hhe"].dot(h_t) + self.params["b_he"])
-            # h = np.tanh(W_xhe.dot(x[t,:,np.newaxis]) + b_xhe + W_hhe.dot(h) + b_hhe)
-            print("t", t, "W_xhe.shape", W_xhe.shape, "x.shape", x.shape, "x[t,:,np.newaxis].shape", x[t,:,np.newaxis].shape)
-            # print("W_xhe", W_xhe, x[t,:,np.newaxis], b_xhe, W_hhe, h, b_hhe)
-            # print("W_xhe.dot(x[t,:,np.newaxis]).shape", W_xhe.dot(x[t,:,np.newaxis]), "b_xhe.shape", b_xhe.shape)
-            # print("t", t, "x[t,:,np.newaxis].shape", x[t,:,np.newaxis].shape)
+            # print("t", t)
+            # print("W_xhe.shape", W_xhe.shape, "x[t,:,np.newaxis].shape", x[t,:,np.newaxis].shape, "x.shape", x.shape)
+            # print("W_hhe.shape", W_hhe.shape, "h.shape", h.shape)
             h = np.tanh(W_xhe.dot(x[t,:,np.newaxis]) + b_xhe  + W_hhe.dot(h) + b_hhe)
 
-        print("W_hmu.shape", W_hmu.shape, "h.shape", h.shape, "b_hmu.shape", b_hmu.shape)
         mu_encoder = W_hmu.dot(h) + b_hmu
         log_sigma_encoder = W_hsigma.dot(h) + b_hsigma
 
@@ -199,8 +183,8 @@ class VRAE:
         W_hhd = self.params['W_hhd'].get_value()
         b_hhd = self.params['b_hd'].get_value()
 
-        W_hxd = self.params['W_xhd'].get_value()
-        b_hxd = self.params['b_hd'].get_value()
+        W_xhd = self.params['W_xhd'].get_value()
+        b_xhd = self.params['b_hd'].get_value()
 
         W_hx = self.params['W_hx'].get_value()
         b_hx = self.params['b_hx'].get_value()
@@ -208,7 +192,7 @@ class VRAE:
         h = W_zh.dot(z) + b_zh
 
         for t in xrange(t_steps):
-            h = np.tanh(W_hhd.dot(h) + b_hhd + W_hxd.dot(x[t,:,np.newaxis]) + b_hxd)
+            h = np.tanh(W_hhd.dot(h) + b_hhd + W_xhd.dot(x[t,:,np.newaxis]) + b_xhd)
             x[t+1,:] = np.squeeze(1 /(1 + np.exp(-(W_hx.dot(h) + b_hx))))
         
         return x[1:,:]
