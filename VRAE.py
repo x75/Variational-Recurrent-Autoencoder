@@ -161,7 +161,7 @@ class VRAE:
             # print("t", t)
             # print("W_xhe.shape", W_xhe.shape, "x[t,:,np.newaxis].shape", x[t,:,np.newaxis].shape, "x.shape", x.shape)
             # print("W_hhe.shape", W_hhe.shape, "h.shape", h.shape)
-            h = np.tanh(W_xhe.dot(x[t,:,np.newaxis]) + b_xhe  + W_hhe.dot(h) + b_hhe)
+            h = np.tanh(W_xhe.dot(x[t,:,np.newaxis]) + b_xhe + W_hhe.dot(h) + b_hhe)
 
         mu_encoder = W_hmu.dot(h) + b_hmu
         log_sigma_encoder = W_hsigma.dot(h) + b_hsigma
