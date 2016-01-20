@@ -137,7 +137,7 @@ class VRAE:
         givens = {
             h0_enc: np.zeros((self.hidden_units_encoder,self.batch_size)).astype(theano.config.floatX), 
             x0:     np.zeros((self.features,self.batch_size)).astype(theano.config.floatX),
-            x:      data[:,:,batch*self.batch_size:(batch+1)*self.batch_size]
+            x:      data[:,:,batch*self.batch_size:(batch+1)*self.batch_size].astype(theano.config.floatX)
         }
 
         self.updatefunction = theano.function([batch,epoch], logpx, updates=updates, givens=givens, allow_input_downcast=True)
@@ -189,10 +189,14 @@ class VRAE:
         W_hx = self.params['W_hx'].get_value()
         b_hx = self.params['b_hx'].get_value()
 
+        # print
+        print(W_zh, b_zh, W_hhd, b_hhd, W_xhd, b_xhd, W_hx, b_hx)
+        
         h = W_zh.dot(z) + b_zh
 
         for t in xrange(t_steps):
             h = np.tanh(W_hhd.dot(h) + b_hhd + W_xhd.dot(x[t,:,np.newaxis]) + b_xhd)
+            # print("decode/h", h)
             x[t+1,:] = np.squeeze(1 /(1 + np.exp(-(W_hx.dot(h) + b_hx))))
         
         return x[1:,:]

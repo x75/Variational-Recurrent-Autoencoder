@@ -37,6 +37,7 @@ data = x_train.T
 data = data.reshape((1, data.shape[0], data.shape[1]))
 
 print(data.shape)
+print("data[0]", data[0])
 
 dimZ = latent_variables = 20
 HU_decoder = 400
@@ -65,8 +66,10 @@ if args.double:
 print "Creating Theano functions"
 # encoder.createGradientFunctions()
 # data = data.reshape((1, data.shape[0], data.shape[1]))
-tdata = theano.shared(data.astype(np.float64))
+tdata = theano.shared(data.astype(np.float32))
 encoder.create_gradientfunctions(tdata)
+
+# pl.plot(data[0])
 
 print("encoding")
 z, mu_encoder, log_sigma_encoder = encoder.encode((data[0].T)[:1000])
